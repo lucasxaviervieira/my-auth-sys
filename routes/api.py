@@ -1,6 +1,14 @@
 
 from flask import Blueprint, jsonify, request
 from db.models.user import User
+import jwt
+import datetime
+
+import os
+from dotenv import load_dotenv
+load_dotenv()
+
+secret_key = os.getenv('SECRET_KEY')
 
 bp = Blueprint(
     "url",
@@ -81,7 +89,8 @@ def verify_user():
             case Situation.USER_EXISTS:
                 user_table.disconnect()
                 message = 'User correct'
-                return jsonify(message,user)
+                bearer_token = encode_auth_token(user['id'])
+                return jsonify(message,bearer_token)
             case Situation.PASS_WRONG:
                 user_table.disconnect()
                 message_error = "Error: Invalid password"
@@ -95,3 +104,18 @@ def verify_user():
         message_error = {"message": "Some error has occured"}
         return jsonify(message_error), 400
 
+def encode_auth_token(user_id):
+    try:
+        payload = {
+            'exp': datetime.datetime.now() + datetime.timedelta(days=0, seconds=5),
+            'iat': datetime.datetime.now(),
+            'sub': user_id
+        }
+        return jwt.encode(
+            payload,
+            secret_key,
+            algorithm='HS256'
+        )
+
+    except Exception as e:
+        return e
