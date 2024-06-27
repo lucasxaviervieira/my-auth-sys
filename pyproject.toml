@@ -1,0 +1,19 @@
+[project]
+name = "my-auth-sys"
+version = "0.1.0"
+description = "Default template for PDM package"
+authors = [
+    {name = "lucasxaviervieira", email = "lucasdavid.xavier@gmail.com"},
+]
+dependencies = [
+    "flask>=3.0.3",
+    "psycopg2>=2.9.9",
+    "python-dotenv>=1.0.1",
+]
+requires-python = "==3.12.*"
+readme = "README.md"
+license = {text = "MIT"}
+
+
+[tool.pdm]
+distribution = false
