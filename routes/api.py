@@ -1,6 +1,6 @@
 
 from flask import Blueprint, jsonify, request
-from db.models.user import User
+from db.models import User, BlackListToken
 from routes.functions.token import Token
 
 bp = Blueprint(
@@ -81,10 +81,16 @@ def login():
         match situation:
             case Situation.USER_EXISTS:
                 user_table.disconnect()
+                
                 tk = Token()
+
                 user_id = user['id']
-                bearer_token = tk.auth(user_id)
-                return jsonify(bearer_token)
+                auth = tk.auth(user_id)
+
+                bl = BlackListToken()
+                bl.create_blacklist(auth)
+
+                return jsonify(auth)
             case Situation.PASS_WRONG:
                 user_table.disconnect()
                 message_error = "Error: Invalid password"
@@ -111,7 +117,7 @@ def verify_token():
     return jsonify(tk.decode_access_token(inp_token)), 200
 
 
-@bp.route("/test/refresh", methods=["POST"])
+@bp.route("/token/refresh", methods=["POST"])
 def verify_refresh_token():
 
     user_table = User()
