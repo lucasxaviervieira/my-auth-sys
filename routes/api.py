@@ -1,14 +1,7 @@
 
 from flask import Blueprint, jsonify, request
 from db.models.user import User
-import jwt
-import datetime
-
-import os
-from dotenv import load_dotenv
-load_dotenv()
-
-secret_key = os.getenv('SECRET_KEY')
+from routes.functions.token import Token
 
 bp = Blueprint(
     "url",
@@ -64,7 +57,7 @@ def create_user():
         return jsonify(message_error), 400
 
 @bp.route("/token/", methods=["POST"])
-def verify_user():
+def login():
     try:
         # conn
         user_table = User()
@@ -88,9 +81,10 @@ def verify_user():
         match situation:
             case Situation.USER_EXISTS:
                 user_table.disconnect()
-                message = 'User correct'
-                bearer_token = encode_auth_token(user['id'])
-                return jsonify(message,bearer_token)
+                tk = Token()
+                user_id = user['id']
+                bearer_token = tk.auth(user_id)
+                return jsonify(bearer_token)
             case Situation.PASS_WRONG:
                 user_table.disconnect()
                 message_error = "Error: Invalid password"
@@ -104,18 +98,27 @@ def verify_user():
         message_error = {"message": "Some error has occured"}
         return jsonify(message_error), 400
 
-def encode_auth_token(user_id):
-    try:
-        payload = {
-            'exp': datetime.datetime.now() + datetime.timedelta(days=0, seconds=5),
-            'iat': datetime.datetime.now(),
-            'sub': user_id
-        }
-        return jwt.encode(
-            payload,
-            secret_key,
-            algorithm='HS256'
-        )
+@bp.route("/test/", methods=["POST"])
+def verify_token():
 
-    except Exception as e:
-        return e
+    user_table = User()
+    user_table.start()
+    
+    tk = Token()
+
+    inp_token = request.json["access_token"]
+
+    return jsonify(tk.decode_access_token(inp_token)), 200
+
+
+@bp.route("/test/refresh", methods=["POST"])
+def verify_refresh_token():
+
+    user_table = User()
+    user_table.start()
+    
+    tk = Token()
+
+    inp_token = request.json["refresh_token"]
+
+    return jsonify(tk.decode_refresh_token(inp_token)), 200
