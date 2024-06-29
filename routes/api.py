@@ -1,4 +1,3 @@
-
 from flask import Blueprint, jsonify, request
 from db.models import User, BlackListToken
 from routes.functions.token import Token
