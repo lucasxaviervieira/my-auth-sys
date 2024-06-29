@@ -57,7 +57,7 @@ def create_user():
 
 @bp.route("/token/", methods=["POST"])
 def login():
-    try:
+    # try:
         # conn
         user_table = User()
         user_table.start()
@@ -99,9 +99,9 @@ def login():
                 message_error = "Error: Invalid username"
                 return jsonify(message_error), 400
             
-    except:
-        message_error = {"message": "Some error has occured"}
-        return jsonify(message_error), 400
+    # except:
+        # message_error = {"message": "Some error has occured"}
+        # return jsonify(message_error), 400
 
 @bp.route("/test/", methods=["POST"])
 def verify_token():

@@ -15,7 +15,8 @@ class BlackListToken(Database):
             """
             CREATE TABLE IF NOT EXISTS blacklist_token (
                 id SERIAL PRIMARY KEY,
-                token VARCHAR(500) UNIQUE NOT NULL,
+                access_token VARCHAR(500) UNIQUE NOT NULL,
+                refresh_token VARCHAR(500) UNIQUE NOT NULL,
                 blacklisted_on TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
             """
