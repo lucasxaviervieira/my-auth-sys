@@ -104,14 +104,15 @@ def login():
 @bp.route("/test/", methods=["POST"])
 def verify_token():
 
-    user_table = User()
-    user_table.start()
-    
     tk = Token()
     
     inp_token = request.json["access_token"]
 
-    return jsonify(tk.decode_access_token(inp_token)), 200
+    new_access_token = tk.decode_access_token(inp_token)
+
+    tk.disconnect()
+    
+    return jsonify(new_access_token), 200
 
 
 @bp.route("/token/refresh", methods=["POST"])

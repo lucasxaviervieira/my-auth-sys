@@ -1,6 +1,5 @@
 import jwt
 from datetime import datetime, timedelta, timezone
-from db.config.database import Database
 
 import os
 from dotenv import load_dotenv
@@ -8,7 +7,7 @@ load_dotenv()
 
 SECRET_KEY = os.getenv('SECRET_KEY')
 
-class Token(Database):
+class Token:
 
     def auth(self, user_id):
         access_token = self.encode_access_token(user_id)
