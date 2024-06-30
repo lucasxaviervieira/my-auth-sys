@@ -100,7 +100,7 @@ def login():
         message_error = {"message": "Some error has occured"}
         return jsonify(message_error), 400
 
-@bp.route("/test/", methods=["POST"])
+@bp.route("/token/test", methods=["POST"])
 def verify_token():
 
     tk = Token()
