@@ -12,6 +12,8 @@ class Situation:
     USER_NOT_EXISTS = 'USER_NOT_EXISTS'
     PASS_WRONG = 'PASS_WRONG'
     MAX_LENGTH = 'MAX_LENGTH'
+    BLACKLIST_TOKEN_EXISTS = 'BLACKLIST_TOKEN_EXISTS'
+    BLACKLIST_TOKEN_NOT_EXISTS = 'BLACKLIST_TOKEN_NOT_EXISTS'
 
 @bp.route("/createuser", methods=["POST"])
 def create_user():
@@ -118,10 +120,19 @@ def verify_refresh_token():
     inp_token = request.json["refresh_token"]
 
     bl = BlackListToken()
-    bl.blacklist_token(inp_token)
-    bl.disconnect()
+    ref_tk_exists = bl.refresh_token_exists("refresh_token", inp_token)
+    if ref_tk_exists:
+        situation = Situation.BLACKLIST_TOKEN_EXISTS
+    else: 
+        situation = Situation.BLACKLIST_TOKEN_NOT_EXISTS
 
-    
-    new_auth = tk.decode_refresh_token(inp_token)    
-
-    return jsonify(new_auth), 200
+    match situation:
+        case Situation.BLACKLIST_TOKEN_EXISTS:
+            bl.disconnect()
+            message_error = "Error: This refresh token is already used"
+            return jsonify(message_error), 400
+        case Situation.BLACKLIST_TOKEN_NOT_EXISTS:
+            bl.blacklist_token(inp_token)    
+            bl.disconnect()
+            new_auth = tk.decode_refresh_token(inp_token)    
+            return jsonify(new_auth), 200
