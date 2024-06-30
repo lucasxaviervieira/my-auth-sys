@@ -11,32 +11,34 @@ class User(Database):
         self.create_table()
 
     def create_table(self):
-        self.cur.execute(
-            """
-            CREATE TABLE if not exists users (
-                id SERIAL PRIMARY KEY,
-                username VARCHAR(50) UNIQUE NOT NULL,
-                password VARCHAR(255) NOT NULL,
-                email VARCHAR(100) UNIQUE NOT NULL,
-                full_name VARCHAR(100) NOT NULL,
-                role VARCHAR(20) DEFAULT 'user',
-                registration_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                last_login TIMESTAMP,
-                is_verified BOOLEAN DEFAULT FALSE,
-                profile_picture VARCHAR(255)
-            );
-            """
-        )
+        query = """
+                CREATE TABLE if not exists users (
+                    id SERIAL PRIMARY KEY,
+                    username VARCHAR(50) UNIQUE NOT NULL,
+                    password VARCHAR(255) NOT NULL,
+                    email VARCHAR(100) UNIQUE NOT NULL,
+                    full_name VARCHAR(100) NOT NULL,
+                    role VARCHAR(20) DEFAULT 'user',
+                    registration_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    last_login TIMESTAMP,
+                    is_verified BOOLEAN DEFAULT FALSE,
+                    profile_picture VARCHAR(255)
+                );
+                """
+        
+        self.cur.execute(query)
         self.conn.commit()
 
     def get_user(self, attribute, value):
-        self.cur.execute(f"SELECT * FROM users WHERE {attribute} = '{value}';")
+        query = f"SELECT * FROM users WHERE {attribute} = '{value}';"      
+        self.cur.execute(query)
         user = self.cur.fetchone()
         user = self.api_response(user)
         return user        
 
     def get_users(self):
-        self.cur.execute("SELECT * FROM users;")
+        query = "SELECT * FROM users;"
+        self.cur.execute(query)
         users = self.cur.fetchall()
         users_list = []
         for user in users:
@@ -46,27 +48,28 @@ class User(Database):
 
     def create_user(self, new_user_obj):
         username, password, email, full_name, profile_picture = new_user_obj.values()
-        self.cur.execute(
-            """
-            INSERT INTO users (username, password, email, full_name, role, is_verified, profile_picture)
-                VALUES (%s, %s, %s, %s, default, default, %s)
-                RETURNING *;
-            """,
-            (username, password, email, full_name, profile_picture),
-        )
+        
+        query = """
+                INSERT INTO users (username, password, email, full_name, role, is_verified, profile_picture)
+                    VALUES (%s, %s, %s, %s, default, default, %s)
+                    RETURNING *;
+                """
+        param = (username, password, email, full_name, profile_picture)
+        
+        self.cur.execute(query, param)
         self.conn.commit()
         new_user = self.cur.fetchone()
         new_user = self.api_response(new_user)
         return new_user
 
     def delete_user(self, id):
-        self.cur.execute(f"DELETE FROM users WHERE id = {id};")
+        query = f"DELETE FROM users WHERE id = {id};"
+        self.cur.execute(query)
         self.conn.commit()
 
     def user_exists(self, attribute, value):
-        self.cur.execute(
-            f"SELECT EXISTS (SELECT 1 FROM users WHERE {attribute} = '{value}');"
-        )
+        query = f"SELECT EXISTS (SELECT 1 FROM users WHERE {attribute} = '{value}');"
+        self.cur.execute(query)
         user_exists = self.cur.fetchone()
         return user_exists[0]
 
