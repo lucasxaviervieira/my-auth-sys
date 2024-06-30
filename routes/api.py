@@ -109,8 +109,6 @@ def verify_token():
     inp_token = request.json["access_token"]
 
     new_access_token = tk.decode_access_token(inp_token)
-
-    tk.disconnect()
     
     return jsonify(new_access_token), 200
 
@@ -123,7 +121,5 @@ def verify_refresh_token():
     inp_token = request.json["refresh_token"]
     
     new_auth = tk.decode_refresh_token(inp_token)    
-
-    tk.disconnect()
 
     return jsonify(new_auth), 200
