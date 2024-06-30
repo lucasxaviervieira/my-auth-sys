@@ -84,9 +84,6 @@ def login():
                 user_id = user['id']
                 auth = tk.auth(user_id)
 
-                bl = BlackListToken()
-                bl.create_blacklist(auth)
-
                 return jsonify(auth)
             case Situation.PASS_WRONG:
                 user_table.disconnect()
@@ -119,6 +116,11 @@ def verify_refresh_token():
     tk = Token()
 
     inp_token = request.json["refresh_token"]
+
+    bl = BlackListToken()
+    bl.blacklist_token(inp_token)
+    bl.disconnect()
+
     
     new_auth = tk.decode_refresh_token(inp_token)    
 

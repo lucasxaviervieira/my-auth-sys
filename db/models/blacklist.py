@@ -15,7 +15,6 @@ class BlackListToken(Database):
             """
             CREATE TABLE IF NOT EXISTS blacklist_token (
                 id SERIAL PRIMARY KEY,
-                access_token VARCHAR(500) UNIQUE NOT NULL,
                 refresh_token VARCHAR(500) UNIQUE NOT NULL,
                 blacklisted_on TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
@@ -23,23 +22,24 @@ class BlackListToken(Database):
         )
         self.conn.commit()
 
-    def create_blacklist(self, auth):
-        access_token, refresh_token = auth.values()
-
+    def blacklist_token(self, refresh_token):
         self.cur.execute(
             """
-            INSERT INTO blacklist_token (access_token, refresh_token)
-                VALUES (%s, %s)
+            INSERT INTO blacklist_token (refresh_token)
+                VALUES (%s)
                 RETURNING *;
             """,
-            (access_token, refresh_token),
+            (refresh_token,),
         )
         self.conn.commit()
         new_blacklist = self.cur.fetchone()
 
         return new_blacklist
+    
+    def delete_blacklist_token(self):
+        self.cur.execute(f"DROP TABLE blacklist_token;")
+        self.conn.commit()       
 
     def delete_user(self, id):
         self.cur.execute(f"DELETE FROM blacklist_token WHERE id = {id};")
-        self.conn.commit()
-        
+        self.conn.commit()       
