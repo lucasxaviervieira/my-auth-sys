@@ -4,6 +4,7 @@ class User(Database):
 
     def __init__(self):
         super().__init__()
+        self.start()
 
     def start(self):
         self.connect()

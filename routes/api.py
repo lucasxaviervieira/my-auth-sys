@@ -16,9 +16,8 @@ class Situation:
 @bp.route("/createuser", methods=["POST"])
 def create_user():
     try:
-        # conn
+        
         user_table = User()
-        user_table.start()
 
         inp_user = request.json["username"]
         inp_pass = request.json["password"]
@@ -57,10 +56,9 @@ def create_user():
 
 @bp.route("/token/", methods=["POST"])
 def login():
-    # try:
-        # conn
+    try:
+
         user_table = User()
-        user_table.start()
 
         inp_user = request.json["username"]
         inp_pass = request.json["password"]
@@ -99,9 +97,9 @@ def login():
                 message_error = "Error: Invalid username"
                 return jsonify(message_error), 400
             
-    # except:
-        # message_error = {"message": "Some error has occured"}
-        # return jsonify(message_error), 400
+    except:
+        message_error = {"message": "Some error has occured"}
+        return jsonify(message_error), 400
 
 @bp.route("/test/", methods=["POST"])
 def verify_token():
@@ -110,7 +108,7 @@ def verify_token():
     user_table.start()
     
     tk = Token()
-
+    
     inp_token = request.json["access_token"]
 
     return jsonify(tk.decode_access_token(inp_token)), 200
@@ -119,11 +117,12 @@ def verify_token():
 @bp.route("/token/refresh", methods=["POST"])
 def verify_refresh_token():
 
-    user_table = User()
-    user_table.start()
-    
     tk = Token()
 
     inp_token = request.json["refresh_token"]
+    
+    new_auth = tk.decode_refresh_token(inp_token)    
 
-    return jsonify(tk.decode_refresh_token(inp_token)), 200
+    tk.disconnect()
+
+    return jsonify(new_auth), 200

@@ -4,7 +4,7 @@ class BlackListToken(Database):
 
     def __init__(self):
         super().__init__()
-        
+        self.start()        
 
     def start(self):
         self.connect()
@@ -26,8 +26,6 @@ class BlackListToken(Database):
     def create_blacklist(self, auth):
         access_token, refresh_token = auth.values()
 
-        self.start()
-
         self.cur.execute(
             """
             INSERT INTO blacklist_token (access_token, refresh_token)
@@ -39,13 +37,9 @@ class BlackListToken(Database):
         self.conn.commit()
         new_blacklist = self.cur.fetchone()
 
-        self.disconnect()
         return new_blacklist
 
     def delete_user(self, id):
-        self.start()
-
         self.cur.execute(f"DELETE FROM blacklist_token WHERE id = {id};")
         self.conn.commit()
-        self.disconnect()
         
