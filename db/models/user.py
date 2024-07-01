@@ -16,6 +16,7 @@ class User(Database):
                     id SERIAL PRIMARY KEY,
                     username VARCHAR(50) UNIQUE NOT NULL,
                     password VARCHAR(255) NOT NULL,
+                    salt VARCHAR(255) NOT NULL,
                     email VARCHAR(100) UNIQUE NOT NULL,
                     full_name VARCHAR(100) NOT NULL,
                     role VARCHAR(20) DEFAULT 'user',
@@ -47,14 +48,14 @@ class User(Database):
         return users_list        
 
     def create_user(self, new_user_obj):
-        username, password, email, full_name, profile_picture = new_user_obj.values()
+        username, password, salt, email, full_name, profile_picture = new_user_obj.values()
         
         query = """
-                INSERT INTO users (username, password, email, full_name, role, is_verified, profile_picture)
-                    VALUES (%s, %s, %s, %s, default, default, %s)
+                INSERT INTO users (username, password, salt, email, full_name, role, is_verified, profile_picture)
+                    VALUES (%s, %s, %s, %s, %s, default, default, %s)
                     RETURNING *;
                 """
-        param = (username, password, email, full_name, profile_picture)
+        param = (username, password, salt, email, full_name, profile_picture)
         
         self.cur.execute(query, param)
         self.conn.commit()
@@ -78,12 +79,13 @@ class User(Database):
             "id": user[0],
             "username": user[1],
             "password": user[2],
-            "email": user[3],
-            "full_name": user[4],
-            "role": user[5],
-            "registration_date": user[6],
-            "last_login": user[7],
-            "is_verified": user[8],
-            "profile_picture": user[9],
+            "salt": user[3],
+            "email": user[4],
+            "full_name": user[5],
+            "role": user[6],
+            "registration_date": user[7],
+            "last_login": user[8],
+            "is_verified": user[9],
+            "profile_picture": user[10],
         }
         return dict_user

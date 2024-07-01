@@ -1,6 +1,7 @@
 from flask import Blueprint, jsonify, request
 from db.models import User, BlackListToken
 from routes.functions.token import Token
+from routes.functions.hash_pass import HashPass as hp
 
 bp = Blueprint(
     "url",
@@ -27,14 +28,16 @@ def create_user():
         inp_full_name = request.json["full_name"]
         inp_prof_pict = request.json["profile_picture"]
 
+        hashed_password, salt = hp.hash_password(inp_pass)
+
         new_user_obj = {
-            "username": inp_user, 
-            "password": inp_pass, 
-            "email": inp_email, 
-            "full_name": inp_full_name, 
-            "profile_picture": inp_prof_pict, 
-        }
-        
+            "username": inp_user,
+            "password": hashed_password,
+            "salt": salt,
+            "email": inp_email,
+            "full_name": inp_full_name,
+            "profile_picture": inp_prof_pict,
+        }        
         
         is_user = user_table.user_exists("username",inp_user)
         is_email = user_table.user_exists("email",inp_email)
@@ -70,10 +73,12 @@ def login():
         if is_user:
             user = user_table.get_user("username",inp_user)
             curr_pass = user['password']
-            if curr_pass == inp_pass:
+            curr_salt = user['salt']
+
+            if hp.verify_password(inp_pass, curr_pass, curr_salt):
                 situation = Situation.USER_EXISTS
-            else: 
-                situation = Situation.PASS_WRONG                
+            else:
+                situation = Situation.PASS_WRONG
         else:
             situation = Situation.USER_NOT_EXISTS
         
